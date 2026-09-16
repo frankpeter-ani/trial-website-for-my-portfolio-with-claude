@@ -191,7 +191,7 @@ export default function Works() {
                   <ul className="pill-row">
                     {p.tags.map((t) => <li key={t}>{t}</li>)}
                   </ul>
-                  <a className="panel-link" href={`/work/${p.slug}`}>
+                  <a className="panel-link" href={`/work/${p.slug}/`}>
                     Read the case study <span aria-hidden="true">→</span>
                   </a>
                 </div>
