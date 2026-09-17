@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { playgroundItems } from "@/lib/content";
+import { playgroundItems, sections } from "@/lib/content";
 import { useDrag, useMediaQuery } from "@/lib/hooks";
 
 /**
@@ -67,15 +67,12 @@ export default function Playground() {
   }, []);
 
   return (
-    <section className="section shell" id="playground" aria-label="My Playground">
+    <section className="section shell" id="craft" aria-label={sections.craft.title}>
       <div className="section-head">
-        <span className="section-num">04</span>
-        <h2>My Playground</h2>
+        <span className="label">{sections.craft.num}</span>
+        <h2>{sections.craft.title}</h2>
+        <p>{sections.craft.note}</p>
       </div>
-      <p className="lede" style={{ marginBottom: 26 }}>
-        Motion experiments, Rive tests, shots that never became projects, typography, three dimensional
-        pieces. Not work, so no dates and no client names.
-      </p>
 
       {isPhone ? (
         <div className="scatter">
@@ -129,7 +126,7 @@ function Chip({ item }: { item: (typeof playgroundItems)[number] }) {
       style={{
         left: `${item.x}%`,
         top: `${item.y}%`,
-        width: `${item.w}%`,
+        width: `${item.w}px`,
         transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${item.rotate}deg) scale(${dragging ? 1.03 : 1})`,
       }}
       {...handlers}

@@ -29,25 +29,6 @@ export const site = {
   ],
 } as const;
 
-export const nav = [
-  { label: "My Playground", href: "#playground" },
-  { label: "My Works", href: "#works" },
-  { label: "About Me", href: "#about" },
-] as const;
-
-/**
- * Hero. Type behaviour comes from reference 2: the first clause sits in full
- * ink, everything after it drops to grey, so the eye reads the claim first and
- * the detail second.
- */
-export const hero = {
-  headlineLead: "Product and interaction design",
-  headlineRest: "for founders and entrepreneurs who care about shipping quality, fast.",
-  subline: "I design it, I animate it, then I build it.",
-  primaryCta: { label: "See the work", target: "#works" },
-  secondaryCta: { label: "Get in touch", target: "#contact" },
-} as const;
-
 export type MediaKind = "browser" | "video" | "illustration" | "data" | "slab";
 
 export interface Project {
@@ -192,12 +173,12 @@ export const caseStudyScaffold: CaseBlock[] = [
 
 /** Playground. Handwritten labels, no dates and no client names. */
 export const playgroundItems = [
-  { id: "p1", label: "still fixing the easing", x: 4, y: 6, w: 24, rotate: -4, tone: "#E8D7C3" },
-  { id: "p2", label: "tuesday afternoon", x: 37, y: 4, w: 21, rotate: 3, tone: "#CBD9E8" },
-  { id: "p3", label: "not sure what this is", x: 70, y: 10, w: 23, rotate: -2, tone: "#D9E2CC" },
-  { id: "p4", label: "rive test, third try", x: 10, y: 54, w: 23, rotate: 5, tone: "#EBD3D8" },
-  { id: "p5", label: "type, no brief", x: 42, y: 60, w: 20, rotate: -6, tone: "#E3DDF0" },
-  { id: "p6", label: "blender, badly", x: 72, y: 56, w: 21, rotate: 2, tone: "#DCD5C6" },
+  { id: "p1", label: "still fixing the easing", x: 3, y: 7, w: 220, rotate: -4, tone: "#E8D7C3" },
+  { id: "p2", label: "tuesday afternoon", x: 27, y: 3, w: 190, rotate: 3, tone: "#CBD9E8" },
+  { id: "p3", label: "not sure what this is", x: 58, y: 9, w: 205, rotate: -2, tone: "#D9E2CC" },
+  { id: "p4", label: "rive test, third try", x: 10, y: 52, w: 200, rotate: 5, tone: "#EBD3D8" },
+  { id: "p5", label: "type, no brief", x: 42, y: 58, w: 175, rotate: -6, tone: "#E3DDF0" },
+  { id: "p6", label: "blender, badly", x: 76, y: 49, w: 195, rotate: 2, tone: "#DCD5C6" },
 ] as const;
 
 /** About. Two paragraphs, first person, no career summary language. */
@@ -270,9 +251,196 @@ export const ama = {
 } as const;
 
 export const styleReferences = [
+  { url: "supplied screenshot", note: "Masthead: corner set information, serif claim low left, a drift of postage stamps through the middle" },
   { url: "fs-oliverboyle.framer.website", note: "Interaction and overall theme" },
   { url: "td-alexfolio.framer.website", note: "Content layout and hero" },
   { url: "dazeign.framer.website", note: "Voice, press to copy email, personal section" },
   { url: "metalab.com/work/windsurf", note: "Case study structure" },
   { url: "codemathics.design", note: "Sound on scroll and the chatbot" },
 ] as const;
+
+/* ---------------------------------------------------------------------------
+ * Paper edition.
+ *
+ * The hero is an editorial masthead: a mono information grid pinned to the
+ * corners, a serif line low left, and a drift of postage stamps floating
+ * through the middle. Everything below it inherits the same grid.
+ * ------------------------------------------------------------------------ */
+
+/** The masthead menu. Four words, the current one set in italic. */
+export const menu = [
+  { label: "Work", href: "#work" },
+  { label: "About", href: "#about" },
+  { label: "Craft", href: "#craft" },
+  { label: "Contact", href: "#contact" },
+] as const;
+
+/** Mono column under the menu. Order is deliberate: work first, mail last. */
+export const contacts = [
+  { label: "LinkedIn", href: "#", pending: true },
+  { label: "X/Twitter", href: "#", pending: true },
+  { label: "Résumé", href: "#", pending: true },
+  { label: "Email", href: `mailto:${site.email}`, pending: false },
+] as const;
+
+/** Top right of the masthead. Two short paragraphs, first person, no pitch. */
+export const profile = {
+  label: "Profile",
+  lines: [
+    "Frankpeter Ani is a product and interaction designer working with founders who care about shipping quality, fast.",
+    "Currently building and designing under Dazeign Studios, previously product design at Tempo AI and Linum Labs.",
+  ],
+  noteLabel: "Now",
+  note: "I work end to end: the product thinking, the interface, the motion, then the build. What I care about is the small stuff that survives a real release. Transitions, empty states, the sentence nobody reads until it matters.",
+} as const;
+
+/**
+ * The line low left. The emphasis word is set in italic serif, so the claim
+ * reads in two beats rather than one.
+ */
+export const masthead = {
+  lineOne: { before: "I design it, I ", italic: "animate", after: " it," },
+  lineTwo: "then I build it.",
+  scrollCue: "Scroll ↓ for work",
+} as const;
+
+/** The card sliding off the right edge, pointing at the work index. */
+export const worksCard = {
+  title: "Works",
+  note: "An ever growing collection of work that blends product, motion and build.",
+  cta: "View all",
+} as const;
+
+export type StampMotif = "arc" | "wash" | "halftone" | "letter" | "specimen" | "grid";
+
+export interface Stamp {
+  id: string;
+  /** Links into the work index when the stamp stands for a project. */
+  slug?: string;
+  /** Printed across the stamp, two words a line. */
+  title: string[];
+  /** Small print along the bottom edge. */
+  footline: string;
+  /** Numerals printed in the corner, as a stamp carries a value. */
+  value: string;
+  motif: StampMotif;
+  tone: string;
+  ink: string;
+  /** Percentages inside the hero stage. */
+  x: number;
+  y: number;
+  /** Width in pixels at the widest breakpoint. */
+  w: number;
+  rotate: number;
+  /** How far it lags the cursor. 0 is pinned, 1 is loose. */
+  depth: number;
+  /** Blur in pixels, for the ones sitting behind the others. */
+  blur?: number;
+}
+
+/**
+ * Six stamps, one per thing on the CV, arranged as a drift rather than a grid.
+ * Positions overlap on purpose: the pile is the point.
+ */
+export const stamps: Stamp[] = [
+  {
+    id: "s-tempo",
+    slug: "tempo",
+    title: ["Tempo", "AI"],
+    footline: "Desktop, motion, front end",
+    value: "01",
+    motif: "arc",
+    tone: "#F7F4EC",
+    ink: "#2B2926",
+    x: 26,
+    y: 30,
+    w: 208,
+    rotate: -9,
+    depth: 0.9,
+  },
+  {
+    id: "s-linum",
+    slug: "linum-labs",
+    title: ["Linum", "Labs"],
+    footline: "Product design at volume",
+    value: "02",
+    motif: "wash",
+    tone: "#DCE7D3",
+    ink: "#2F3A2A",
+    x: 44,
+    y: 14,
+    w: 176,
+    rotate: 7,
+    depth: 0.45,
+    blur: 2.4,
+  },
+  {
+    id: "s-cherry",
+    slug: "cherry-network",
+    title: ["Cherry", "Network"],
+    footline: "Interaction and motion",
+    value: "03",
+    motif: "halftone",
+    tone: "#EFE9E2",
+    ink: "#2B2926",
+    x: 12,
+    y: 48,
+    w: 186,
+    rotate: 14,
+    depth: 0.7,
+  },
+  {
+    id: "s-onenet",
+    slug: "onenet",
+    title: ["Onenet"],
+    footline: "Platform and data views",
+    value: "04",
+    motif: "grid",
+    tone: "#D9E6E4",
+    ink: "#23383A",
+    x: 74,
+    y: 22,
+    w: 168,
+    rotate: -12,
+    depth: 0.35,
+    blur: 1.6,
+  },
+  {
+    id: "s-inspark",
+    slug: "inspark",
+    title: ["Inspark"],
+    footline: "Brand, product, motion",
+    value: "05",
+    motif: "letter",
+    tone: "#F2E7E5",
+    ink: "#3A2626",
+    x: 56,
+    y: 58,
+    w: 196,
+    rotate: 6,
+    depth: 1,
+  },
+  {
+    id: "s-dazeign",
+    title: ["Dazeign", "Studios"],
+    footline: "Spécimen, the practice underneath",
+    value: "06",
+    motif: "specimen",
+    tone: "#E9E4D8",
+    ink: "#2B2926",
+    x: 2,
+    y: 12,
+    w: 164,
+    rotate: 4,
+    depth: 0.55,
+    blur: 1.2,
+  },
+];
+
+/** Section numbering for the rest of the page. */
+export const sections = {
+  work: { num: "01", title: "Work", note: "Six places, one way of working. Case studies open on their own page." },
+  craft: { num: "02", title: "Craft", note: "Motion experiments, Rive tests and pieces that never became projects. No dates, no client names." },
+  about: { num: "03", title: "About", note: "The short version, in the first person." },
+  contact: { num: "04", title: "Contact", note: "Available for product and interaction work." },
+} as const;

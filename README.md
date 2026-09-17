@@ -1,8 +1,7 @@
 # Frankpeter portfolio
 
-Next.js build of the content brief, section by section. Everything the brief
-specified as content and behaviour is implemented; everything it listed as
-outstanding is a visible placeholder rather than an invented fact.
+Next.js build of the portfolio. The current design is the paper edition: a
+printed masthead for a hero, with the rest of the page inheriting its grid.
 
 ## Running it
 
@@ -11,79 +10,89 @@ npm install
 npm run dev        # http://localhost:3000
 npm run build      # production build
 npm run typecheck  # tsc --noEmit
+STATIC_EXPORT=1 npm run build   # plain files in out/ for a preview host
 ```
 
 ## Where the words live
 
 `lib/content.ts` is the only file you need to touch to fill the site in. Every
-string on the page comes from it. Anything wrapped in `TODO(...)` renders as a
-marked placeholder in the browser, so a gap is obvious rather than quietly
-reading as a finished claim.
+string on the page comes from it, the stamps included. Anything wrapped in
+`TODO(...)` renders as a marked placeholder in the browser, so a gap is obvious
+rather than quietly reading as a finished claim.
 
-Two rules from the brief hold throughout: no dashes and no hyphens in any copy,
-and never a metric that was not supplied.
+Two rules hold throughout: no dashes and no hyphens in any copy, and never a
+metric that was not supplied.
+
+## The masthead
+
+The hero is set like a printed cover.
+
+* **Corners carry the information.** Name and discipline top left, menu and
+  contact under it, the standing profile copy and a dated note top right.
+* **The claim sits low left**, large, with one word in italic serif so it reads
+  in two beats.
+* **The works card is cropped by the right edge**, so it reads as the start of
+  a second page rather than a button.
+* **A drift of postage stamps floats through the middle.** One per thing on the
+  CV. Each one is drawn in CSS: the perforated edge is a four way mask, the
+  shadow is a drop shadow filter on the wrapper so the mask does not clip it,
+  and the art is a gradient or a letterform sized to the real thing. Drop a
+  photograph in behind any of them and nothing moves.
+
+Three transforms stack on separate elements so they never fight: the wrapper
+carries the drag offset and the cursor parallax, the inner element carries the
+rotation and the drift. Depth per stamp decides how far it lags the cursor, and
+the ones behind are blurred until you touch them.
+
+On a phone the masthead stops being a cover and becomes a sequence: who, the
+claim, the stamps, then the standing copy. Dragging is not attempted on touch.
 
 ## Page order
 
-Work sits directly under the hero. Everything after the work panels scrolls
-normally.
-
 | | Section | Behaviour |
 |---|---|---|
-| 01 | Hero | Static, one draggable object, ambient cursor drifter |
-| 02 | My Works | Scroll snapped panels, colour per project, sound |
-| 03 | Case studies | Separate routes at `/work/[slug]` |
-| 04 | My Playground | Pannable, zoomable canvas |
-| 05 | About Me | Desktop metaphor plus credentials |
-| 06 | Experience | Four column table |
-| 07 | Tools I use | Marquee row |
-| 08 | Ask me anything | Overlay, reachable from every page |
-| 09 | Contact | Footer |
+| | Masthead | Draggable stamps, cursor parallax, ambient drift |
+| 01 | Work | Ruled index, one line per project, stamp preview follows the cursor |
+| 02 | Craft | Pannable, zoomable canvas |
+| 03 | About | Copy, facts, the CV as four columns, tools as a marquee |
+| 04 | Contact | Press to copy address and the small print |
+
+Case studies live at `/work/[slug]`. The thin top bar appears once the masthead
+has scrolled away, and is there from the start on every other route.
 
 ## Decisions taken during the build
 
-* **Hero copy.** Headline and subline are the positioning line you chose, set
-  with the reference 2 type behaviour: the first clause in full ink, the
-  remainder dropped to grey.
-* **Location.** London Area, UK, everywhere it appears: the status card, the
-  about snapshot, the footer and the page metadata.
-* **Snapping.** Scoped to the work panels only, using `scroll-snap-align` with
-  `proximity` on the document, and switched off below 900px, on coarse pointers
-  and under reduced motion. Everything below the last project scrolls normally.
-* **Sound.** One swoosh synthesised in the Web Audio API, pitched per panel,
-  tied to the wipe rather than to scroll position. Muted by default, the choice
-  is remembered in local storage, nothing plays before the visitor has
-  interacted, and it stays silent under reduced motion.
-* **Drag physics.** One hook (`useDrag`) powers the hero object, the playground
-  chips and the pinned photos, so the three sections rhyme as the brief asked.
-* **Ask me anything.** Wired to a local answer bank in `lib/ama-answers.ts` so
-  it works with no backend. It refuses to guess: anything outside the bank gets
-  a plain "not written down yet" plus the email. Swap that one function for a
-  model call and keep the same rule.
-* **Touch.** Dragging is not attempted on phones. The playground becomes a
-  scrollable scattered layout and the pinned photos sit still, exactly as the
-  brief specified.
+* **Type.** Instrument Serif for anything said out loud, Inter for anything
+  explained, JetBrains Mono for the labels holding the grid together.
+* **Surface.** One warm paper with a fine grain and a soft vignette, both fixed
+  behind the content and neither interactive.
+* **Sound.** The scroll snapped work panels are gone, and the swoosh that was
+  tied to them with them. `usePanelSound` is still in `lib/hooks.ts` if a future
+  section wants it.
+* **Drag physics.** One hook (`useDrag`) powers the stamps and the craft chips,
+  so the two piles rhyme.
+* **Ask me anything.** Unchanged in behaviour, restyled onto the paper. It still
+  refuses to guess: anything outside `lib/ama-answers.ts` gets a plain "not
+  written down yet" plus the email.
+* **Reduced motion.** Drift, marquee, the scroll cue and the typing caret all
+  stop, and transitions collapse.
 
 ## Still outstanding
 
 These are the brief's own open items. Each one is a marked slot in the code.
 
-1. **Which projects go in the work panels.** Five panels are scaffolded from the
-   companies on the CV. Replace the slugs, headlines, colours and media kinds in
-   `projects`.
-2. **Per project:** what was broken, what constrained you, what you decided and
+1. **Per project:** what was broken, what constrained you, what you decided and
    what you gave up, what happened.
-3. **The CV conflicts.** The two Tempo roles overlap by two months, and the
+2. **The CV conflicts.** The two Tempo roles overlap by two months, and the
    Linum project count is 25 on the CV against 35 in conversation. Both slots
    are empty until they are settled.
-4. **Email address.** `site.email` is a placeholder. It powers the copy
+3. **Email address.** `site.email` is a placeholder. It powers the copy
    shortcut, the footer and the chatbot fallback, so it is one edit in one
    place.
-5. **Domain, Dribbble and Contra links** for the footer.
-6. **Real media.** Every panel, case study and playground tile is a placeholder
-   shape sized to the real thing.
-7. **Portrait.** The hero holds a dithered field that reacts to the cursor.
-   Drop the real image behind it when you have one.
+4. **Domain and the three social links** in `contacts`.
+5. **Real media.** Every stamp, case study and craft tile is a placeholder shape
+   sized to the real thing.
+6. **About copy.** Two paragraphs, the three step path and two of the facts.
 
 ## Keyboard
 
