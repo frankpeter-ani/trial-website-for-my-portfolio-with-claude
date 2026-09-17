@@ -24,7 +24,7 @@ const bank: Answer[] = [
   {
     match: /ship|built|built it|what have you/i,
     reply:
-      "design, motion and the front end, usually all three on the same project.\nthe work panels above are the short version. the case studies go into what broke and what it cost.\nthe specifics per project are still being written, so i am not going to pad them here.",
+      "design, motion and the front end, usually all three on the same project.\nthe work index above is the short version. the case studies go into what broke and what it cost.\nthe specifics per project are still being written, so i am not going to pad them here.",
   },
   {
     match: /build|code|just design|develop/i,

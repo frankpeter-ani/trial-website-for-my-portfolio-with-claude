@@ -1,97 +1,64 @@
-"use client";
-
-import { about, site } from "@/lib/content";
-import { useCopyEmail, useDrag, useMediaQuery } from "@/lib/hooks";
-import Pending from "./Pending";
+import { about, sections, site } from "@/lib/content";
+import Pending from "@/components/Pending";
+import Experience from "@/components/Experience";
+import Tools from "@/components/Tools";
 
 /**
- * Two references solving different halves: the desktop metaphor carries the
- * human side, the credentials layout carries the contact links and the bio.
- * The pinned objects use the same physics as the hero object, so the two
- * sections rhyme.
+ * About. Two paragraphs set in the serif so they read as speech, a ruled table
+ * of facts beside them, then the CV as a four column list and the tools as one
+ * slow moving row.
  */
 export default function About() {
-  const isPhone = useMediaQuery("(max-width: 760px)");
-  const { copied, copy } = useCopyEmail(site.email);
-
   return (
-    <section className="section shell" id="about" aria-label="About Me">
+    <section className="section shell" id="about" aria-label={sections.about.title}>
       <div className="section-head">
-        <span className="section-num">05</span>
-        <h2>About Me</h2>
+        <span className="label">{sections.about.num}</span>
+        <h2>{sections.about.title}</h2>
+        <p>{sections.about.note}</p>
       </div>
 
       <div className="about-grid">
-        <div className="desktop">
-          <span className="kicker desk-label"><span aria-hidden="true">🗂</span> Pinned on Desktop</span>
-          {about.pinned.map((item) => (
-            <PinnedItem key={item.id} item={item} still={isPhone} />
+        <span className="label">Words</span>
+
+        <div className="about-copy">
+          {about.paragraphs.map((p, i) => (
+            <p key={i}>
+              <Pending text={p} />
+            </p>
           ))}
+
+          <div className="path">
+            {about.path.map((step) => (
+              <div key={step.step}>
+                <span className="label">{step.step}</span>
+                <span>
+                  <Pending text={step.text} />
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="bio">
-          <ul className="link-stack">
-            <li>
-              <button className="btn ghost" type="button" onClick={() => void copy()} style={{ padding: "8px 14px" }}>
-                {copied ? "Copied" : site.email}
-              </button>
-            </li>
-            {site.links.filter((l) => l.label !== "Email").map((l) => (
-              <li key={l.label}>
-                <a href={l.href}>
-                  {l.label} {l.pending ? <span className="pending">link pending</span> : null}
-                </a>
-              </li>
+        <div>
+          <div className="facts">
+            {about.snapshot.map((row) => (
+              <div key={row.label}>
+                <span className="label">{row.label}</span>
+                <span>
+                  <Pending text={row.value} />
+                </span>
+              </div>
             ))}
-          </ul>
-
-          {about.paragraphs.map((text, i) => (
-            <p key={i} style={{ color: "var(--ink-2)" }}><Pending text={text} /></p>
-          ))}
-
-          <ul className="snapshot">
-            {about.snapshot.map((s) => (
-              <li key={s.label}>
-                <b>{s.label}</b>
-                <Pending text={s.value} />
-              </li>
-            ))}
-          </ul>
-
-          <ul className="path">
-            {about.path.map((p) => (
-              <li key={p.step}>
-                <span className="step">{p.step}</span>
-                <span><Pending text={p.text} /></span>
-              </li>
-            ))}
-          </ul>
+            <div>
+              <span className="label">Status</span>
+              <span>{site.status}</span>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
-  );
-}
 
-function PinnedItem({ item, still }: { item: (typeof about.pinned)[number]; still: boolean }) {
-  const { pos, dragging, handlers } = useDrag({ x: 0, y: 0 }, { enabled: !still });
-  return (
-    <div
-      className="pin"
-      data-dragging={dragging}
-      style={
-        still
-          ? undefined
-          : {
-              left: `${item.x}%`,
-              top: `${item.y}%`,
-              transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${item.rotate}deg)`,
-            }
-      }
-      {...(still ? {} : handlers)}
-    >
-      <div className="thumb" />
-      <b><Pending text={item.title} /></b>
-      <small><Pending text={item.note} /></small>
-    </div>
+      <Experience />
+      <Tools />
+    </section>
   );
 }

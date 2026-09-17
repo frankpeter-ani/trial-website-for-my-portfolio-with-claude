@@ -31,6 +31,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
   return (
     <article className="case">
       <div className="shell">
+        <a className="case-back" href="/#work">← All work</a>
         <h1>{project.headline.join(" ")}</h1>
         <div className="case-meta">
           <div>
@@ -73,7 +74,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           <div>
             <h2>Next</h2>
             <p style={{ display: "flex", gap: 18, flexWrap: "wrap", marginTop: 14 }}>
-              <a className="panel-link" href="/#works">All work <span aria-hidden="true">→</span></a>
+              <a className="panel-link" href="/#work">All work <span aria-hidden="true">→</span></a>
               <a className="panel-link" href="/#contact">Get in touch <span aria-hidden="true">→</span></a>
             </p>
           </div>

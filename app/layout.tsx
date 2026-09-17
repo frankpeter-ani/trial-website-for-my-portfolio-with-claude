@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { site } from "@/lib/content";
-import Nav from "@/components/Nav";
-import Drifter from "@/components/Drifter";
+import TopBar from "@/components/TopBar";
 import Ama from "@/components/Ama";
 import "./globals.css";
 
@@ -42,8 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <a className="skip" href="#main">Skip to content</a>
-        <Drifter />
-        <Nav />
+        <TopBar />
         <main id="main">{children}</main>
         <Ama />
       </body>
