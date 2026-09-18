@@ -1,0 +1,480 @@
+/* ==========================================================================
+   FRANCO design system
+   Tokens, scale and components measured off the template snapshot in
+   reference/franco-template. Values here match DESIGN-SYSTEM.md exactly:
+   if one moves, move it there too.
+   ========================================================================== */
+
+:root {
+  --ink: #16231B;
+  --cream: #F9F5EB;
+  --sand: #ECE7D9;
+  --ink-60: rgba(22, 35, 27, 0.6);
+  --ink-40: rgba(22, 35, 27, 0.4);
+  --ink-16: rgba(22, 35, 27, 0.16);
+  --cream-50: rgba(249, 245, 235, 0.5);
+  --cream-16: rgba(255, 255, 255, 0.16);
+
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --wordmark: "Host Grotesk", "Inter", system-ui, sans-serif;
+
+  --content: 1376px;
+  --gutter: 32px;
+  --section: 120px;
+  --nav-h: 64px;
+}
+
+@media (max-width: 1199px) {
+  :root { --gutter: 20px; --section: 80px; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Type scale
+   Headings set solid, negative tracking that grows with the size. Nothing
+   under 20px gets negative tracking; the mono never appears above 12px.
+   -------------------------------------------------------------------------- */
+
+.display, .heading {
+  font-family: var(--serif);
+  font-weight: 400;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.display { font-size: 88px; line-height: 88px; letter-spacing: -1.76px; }
+.heading { font-size: 56px; line-height: 56px; letter-spacing: -1.12px; }
+
+@media (max-width: 1199px) {
+  .display { font-size: 64px; line-height: 64px; }
+  .heading { font-size: 46px; line-height: 46px; }
+}
+
+@media (max-width: 809px) {
+  .display { font-size: 56px; line-height: 56px; }
+  .heading { font-size: 36px; line-height: 36px; }
+}
+
+.lead {
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.72px;
+  margin: 0;
+  max-width: 704px;
+}
+
+.body-lg { font-size: 20px; line-height: 28px; letter-spacing: -0.6px; margin: 0; }
+
+@media (max-width: 809px) {
+  .lead { font-size: 20px; line-height: 24px; }
+  .body-lg { font-size: 18px; line-height: 26px; }
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.24px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.caption { font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: -0.14px; margin: 0; }
+
+/* --------------------------------------------------------------------------
+   Layout
+   Sections are separated by their own padding. No rules, no spacers: the
+   rhythm comes from the cream to ink flip.
+   -------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--content);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-block: var(--section); }
+.on-ink { background: var(--ink); color: var(--cream); }
+.on-cream { background: var(--cream); color: var(--ink); }
+
+.section-head { display: flex; flex-direction: column; gap: 24px; }
+.section-head .lead { color: var(--ink-60); }
+.on-ink .section-head .lead { color: var(--cream-50); }
+
+/* --------------------------------------------------------------------------
+   Components
+   Two radii in the whole system: 8px for anything rectangular, 24px for pills.
+   -------------------------------------------------------------------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 4px 16px;
+  border-radius: 24px;
+  box-shadow: inset 0 0 0 1px var(--ink-16);
+  color: var(--ink);
+  width: fit-content;
+}
+
+.on-ink .chip { box-shadow: inset 0 0 0 1px var(--cream-16, rgba(255, 255, 255, 0.16)); color: var(--cream); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 0;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 160ms ease, background-color 160ms ease;
+}
+
+.btn:hover { opacity: 0.85; }
+
+.btn-light { background: var(--cream); color: var(--ink); }
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-transparent { background: var(--cream-16); color: var(--cream); }
+.on-cream .btn-transparent { background: var(--ink-16); color: var(--ink); }
+
+.btn-sm {
+  height: 32px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.14px;
+}
+
+.card {
+  border-radius: 8px;
+  background: var(--sand);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.on-ink .card { background: rgba(255, 255, 255, 0.06); }
+
+/* A slot the content brief left open. Carried over from the main site so a gap
+   still reads as a gap and never as a finished claim. */
+.pending {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.24px;
+  color: var(--ink-60);
+  background: rgba(22, 35, 27, 0.06);
+  box-shadow: inset 0 0 0 1px var(--ink-16);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+
+.on-ink .pending {
+  color: var(--cream-50);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   Nav
+   -------------------------------------------------------------------------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--nav-h);
+  background: var(--cream);
+  border-bottom: 1px solid var(--ink-16);
+}
+
+.nav-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav-mark {
+  font-family: var(--wordmark);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.32px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.nav-links { display: flex; gap: 24px; }
+.nav-links a { color: var(--ink); text-decoration: none; }
+.nav-links a:hover { color: var(--ink-60); }
+
+@media (max-width: 809px) {
+  .nav-links { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   The wordmark is the one piece of Host Grotesk on the page. It is sized in
+   viewport units so it holds the full measure at every width, the way the
+   template does it at runtime.
+   -------------------------------------------------------------------------- */
+
+.hero {
+  min-height: calc(900px - var(--nav-h));
+  background: var(--ink);
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 40px 80px;
+}
+
+.hero-mark {
+  font-family: var(--wordmark);
+  font-weight: 700;
+  font-size: calc((100vw - 2 * var(--gutter)) / (var(--mark-len, 6) * 0.687));
+  line-height: 0.835;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--cream);
+}
+
+.hero-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--cream);
+  margin-top: 8px;
+}
+
+.hero-foot { display: flex; flex-direction: column; gap: 32px; margin-top: 120px; }
+.hero-foot .heading { max-width: 900px; }
+.hero-foot .lead { color: var(--cream-50); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+@media (max-width: 809px) {
+  .hero { min-height: 0; }
+  .hero-foot { margin-top: 80px; }
+}
+
+/* --------------------------------------------------------------------------
+   Work
+   -------------------------------------------------------------------------- */
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 64px;
+}
+
+@media (max-width: 809px) {
+  .work-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.work-card { min-height: 420px; justify-content: flex-start; text-decoration: none; color: inherit; padding: 16px; }
+
+.work-media { border-radius: 8px; height: 220px; width: 100%; }
+
+.work-card > *:not(.work-media) { padding-inline: 16px; }
+.work-card > .work-tags { padding-bottom: 16px; }
+.work-card:hover { background: #E4DDCB; }
+.work-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.work-top .eyebrow { color: var(--ink-60); }
+.work-card .heading { margin-top: 8px; }
+.work-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tag {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.24px;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  box-shadow: inset 0 0 0 1px var(--ink-16);
+  border-radius: 24px;
+  padding: 4px 12px;
+}
+
+/* --------------------------------------------------------------------------
+   About
+   -------------------------------------------------------------------------- */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 64px;
+  margin-top: 64px;
+}
+
+@media (max-width: 1199px) {
+  .about-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+}
+
+.about-copy { display: flex; flex-direction: column; gap: 20px; }
+.snapshot { display: flex; flex-direction: column; gap: 0; }
+
+.snapshot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding-block: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.snapshot-row:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.16); }
+.snapshot-row .eyebrow { color: var(--cream-50); }
+
+/* --------------------------------------------------------------------------
+   Experience
+   -------------------------------------------------------------------------- */
+
+.table { margin-top: 64px; }
+
+.table-row {
+  display: grid;
+  grid-template-columns: 140px 220px 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-block: 24px;
+  border-top: 1px solid var(--ink-16);
+}
+
+.table-row:last-child { border-bottom: 1px solid var(--ink-16); }
+.table-head { color: var(--ink-60); }
+
+@media (max-width: 1199px) {
+  .table-row { grid-template-columns: 120px minmax(0, 1fr); }
+  .table-head { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Tools
+   -------------------------------------------------------------------------- */
+
+.marquee {
+  margin-top: 48px;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 80px, #000 calc(100% - 80px), transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+
+.on-ink .marquee-item { color: rgba(249, 245, 235, 0.4); }
+
+.marquee-item {
+  font-family: var(--serif);
+  font-size: 56px;
+  line-height: 56px;
+  letter-spacing: -1.12px;
+  color: var(--ink-40);
+  white-space: nowrap;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* --------------------------------------------------------------------------
+   Contact and footer
+   -------------------------------------------------------------------------- */
+
+.contact-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+
+.footer { background: var(--ink); color: var(--cream); padding-block: 80px 40px; }
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  gap: 48px;
+}
+
+@media (max-width: 809px) {
+  .footer-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+}
+
+.footer-mark {
+  font-family: var(--wordmark);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.footer-col { display: flex; flex-direction: column; gap: 12px; }
+.footer-col .eyebrow { color: var(--cream-50); margin-bottom: 4px; }
+.footer-col a { color: var(--cream); text-decoration: none; }
+.footer-col a:hover { color: var(--cream-50); }
+
+.footer-fine {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--cream-50);
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: var(--gutter);
+  top: 8px;
+  z-index: 50;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 809px) {
+  .marquee-item { font-size: 36px; line-height: 36px; letter-spacing: -0.72px; }
+  .marquee-track { gap: 32px; }
+}

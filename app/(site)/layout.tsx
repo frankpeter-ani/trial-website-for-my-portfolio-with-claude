@@ -3,7 +3,7 @@ import { site } from "@/lib/content";
 import Nav from "@/components/Nav";
 import Drifter from "@/components/Drifter";
 import Ama from "@/components/Ama";
-import "./globals.css";
+import "../globals.css";
 
 export const metadata: Metadata = {
   title: `${site.name}, ${site.role}`,
