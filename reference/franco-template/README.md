@@ -32,3 +32,31 @@ edits fixed that:
   video poster and the open graph image.
 
 Both gaps need the original CDN, which is unreachable from this environment.
+
+## The rest of the template's pages are not here
+
+`index.html` links to eleven other pages, none of which were in the zip. It was
+a single page export:
+
+| Link in the export | Present |
+|---|---|
+| `pages/about.html` | no |
+| `pages/pricing.html` | no |
+| `pages/faq.html` | no |
+| `pages/blog.html` | no |
+| `pages/careers.html` | no |
+| `pages/contact.html` | no |
+| `pages/privacy-policy.html` | no |
+| `pages/404.html` | no |
+| 3 blog detail pages | no |
+
+Fetching them here is not possible either: `framer.com` and
+`franco-template.framer.website` are both refused by this environment's egress
+proxy, so the marketplace listing and the live site are out of reach. Getting
+them needs a fresh export that includes the other pages, or the individual page
+HTML saved and uploaded.
+
+Until then, `DESIGN-SYSTEM.md` is the way to build pages in this style: it
+carries the measured tokens, type scale, component specs and the section
+pattern every page on the site repeats.
+
