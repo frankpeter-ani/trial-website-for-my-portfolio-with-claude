@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-geist: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+    --color-yellow: #FFFF00;
+    --color-dark: #000000;
+    --color-muted: #707070;
+    --color-gray-bg: #F7F6F5;
+    --color-border: #DEDEDE;
+  }
+
+  body {
+    font-family: var(--font-geist);
+    color: var(--color-dark);
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace !important;
+}
+
+.font-geist {
+  font-family: var(--font-geist), sans-serif !important;
+}
+
+/* Finara Eyebrow Pill Badge */
+.finara-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 80px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #383838;
+  background-color: #F7F6F5;
+  border: 1px solid #DEDEDE;
+}
+
+.finara-eyebrow-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.finara-eyebrow-dot-1 {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #000000;
+}
+
+.finara-eyebrow-dot-2 {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #858383;
+}
+
+/* Card styles */
+.finara-card-white {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #EBEBEB;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.finara-card-yellow {
+  background-color: #FFFF00;
+  color: #000000;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.finara-card-dark {
+  background-color: #000000;
+  color: #ffffff;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Buttons */
+.finara-btn-yellow {
+  background-color: #FFFF00;
+  color: #000000;
+  font-weight: 600;
+  border-radius: 80px;
+  padding: 12px 24px;
+  transition: all 0.2s ease;
+}
+
+.finara-btn-yellow:hover {
+  background-color: #E6E600;
+}
+
+.finara-btn-black {
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 80px;
+  padding: 12px 24px;
+  transition: all 0.2s ease;
+}
+
+.finara-btn-black:hover {
+  background-color: #222222;
+}

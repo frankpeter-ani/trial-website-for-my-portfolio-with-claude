@@ -1,0 +1,62 @@
+name: Deploy Finara to GitHub Pages
+
+on:
+  push:
+    branches: [claude/sleepy-edison-8ftqao]
+    paths:
+      - 'finara/**'
+      - '.github/workflows/deploy-finara-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: finara
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: finara/package-lock.json
+
+      - run: npm ci
+
+      # enablement turns Pages on via the API if it isn't already
+      - uses: actions/configure-pages@v5
+        id: pages
+        with:
+          enablement: true
+
+      - run: npm run build
+        env:
+          # project site is served from /<repo>/, and a static host cannot
+          # rewrite deep links, so this build uses hash routing
+          VITE_BASE: ${{ steps.pages.outputs.base_path }}/
+          VITE_HASH_ROUTER: 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: finara/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
