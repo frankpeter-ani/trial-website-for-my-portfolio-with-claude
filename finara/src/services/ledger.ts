@@ -1,114 +1,163 @@
 // ====================================================================
-// FINARA DOUBLE-ENTRY ACCOUNTING SERVICE
-// Atomic Double-Entry Ledger Engine (Debits == Credits)
+// FINARA — DOUBLE-ENTRY LEDGER (domain layer)
 // ====================================================================
+// Builds and validates balanced journal entries. This module is pure: it
+// decides what *should* be written. Persistence is the server's job, inside
+// one database transaction (see docs/DATABASE.md).
+//
+// The previous implementation derived its own debits and credits from the
+// same inputs and then "checked" they matched - an invariant that could not
+// fail. Here the caller supplies the legs and the invariant is real.
 
-import { toExactDecimal, verifyLedgerBalance, type SupportedCurrency } from '../lib/money';
+import { Money, verifyLedgerBalance, type CurrencyCode, MoneyError } from '../lib/money/index.ts';
 
-export interface LedgerEntryRecord {
-  id: string;
-  transactionId: string;
-  accountCode: string;
-  entryType: 'debit' | 'credit';
-  amount: number;
-  currency: SupportedCurrency;
-  createdAt: string;
+export type EntryDirection = 'debit' | 'credit';
+
+export type TransactionType =
+  | 'internal_transfer'
+  | 'bank_transfer'
+  | 'deposit'
+  | 'withdrawal'
+  | 'currency_exchange'
+  | 'fee'
+  | 'reversal'
+  | 'adjustment';
+
+/** One side of a posting. Amounts are always positive; direction carries sign. */
+export interface PostingLeg {
+  readonly accountCode: string;
+  readonly direction: EntryDirection;
+  readonly amount: Money;
+  readonly memo?: string;
 }
 
-export interface DoubleEntryTransactionParams {
-  idempotencyKey: string;
-  userId: string;
-  type: 'internal_transfer' | 'bank_transfer' | 'deposit' | 'withdrawal' | 'currency_exchange' | 'stock_buy' | 'sell_stock';
-  amount: number;
-  currency: SupportedCurrency;
-  fee?: number;
-  sourceAccountCode: string; // e.g. '1010-CASH-USD' or '2010-USER-WALLET'
-  destinationAccountCode: string; // e.g. '2010-USER-WALLET' or '4010-REVENUE-FEE'
-  metadata?: Record<string, any>;
+export interface JournalEntryDraft {
+  readonly idempotencyKey: string;
+  readonly type: TransactionType;
+  readonly legs: readonly PostingLeg[];
+  readonly metadata?: Readonly<Record<string, string | number | boolean>>;
 }
 
-export interface LedgerTransactionResult {
-  success: boolean;
-  transactionId: string;
-  idempotencyKey: string;
-  entries: LedgerEntryRecord[];
-  error?: string;
+export interface ValidatedJournalEntry extends JournalEntryDraft {
+  readonly currency: CurrencyCode;
+  readonly total: Money;
+}
+
+export type LedgerValidation =
+  | { readonly ok: true; readonly entry: ValidatedJournalEntry }
+  | { readonly ok: false; readonly code: string; readonly message: string };
+
+const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_:-]{7,127}$/;
+
+/**
+ * Validate a draft posting. Rejects anything that would corrupt the ledger:
+ * missing idempotency, empty or one-sided postings, non-positive amounts,
+ * mixed currencies, or debits that do not equal credits.
+ */
+export function validateJournalEntry(draft: JournalEntryDraft): LedgerValidation {
+  if (!IDEMPOTENCY_PATTERN.test(draft.idempotencyKey)) {
+    return {
+      ok: false,
+      code: 'INVALID_IDEMPOTENCY_KEY',
+      message: 'Idempotency key must be 8-128 chars of [A-Za-z0-9_:-] and start alphanumeric.',
+    };
+  }
+  if (draft.legs.length < 2) {
+    return { ok: false, code: 'INSUFFICIENT_LEGS', message: 'A posting requires at least two legs.' };
+  }
+
+  const debits = draft.legs.filter((l) => l.direction === 'debit');
+  const credits = draft.legs.filter((l) => l.direction === 'credit');
+  if (debits.length === 0 || credits.length === 0) {
+    return { ok: false, code: 'ONE_SIDED_POSTING', message: 'A posting needs both debit and credit legs.' };
+  }
+  if (draft.legs.some((l) => !l.accountCode.trim())) {
+    return { ok: false, code: 'MISSING_ACCOUNT_CODE', message: 'Every leg needs an account code.' };
+  }
+  if (draft.legs.some((l) => !l.amount.isPositive())) {
+    return {
+      ok: false,
+      code: 'NON_POSITIVE_AMOUNT',
+      message: 'Leg amounts must be strictly positive; direction carries the sign.',
+    };
+  }
+
+  const currency = draft.legs[0].amount.currency;
+  if (draft.legs.some((l) => l.amount.currency !== currency)) {
+    return {
+      ok: false,
+      code: 'CURRENCY_MISMATCH',
+      message: 'A single posting may not mix currencies. Use two postings and an FX bridge account.',
+    };
+  }
+
+  let balanced: boolean;
+  try {
+    balanced = verifyLedgerBalance(debits.map((l) => l.amount), credits.map((l) => l.amount));
+  } catch (err) {
+    const code = err instanceof MoneyError ? err.code : 'LEDGER_CHECK_FAILED';
+    return { ok: false, code, message: (err as Error).message };
+  }
+  if (!balanced) {
+    return {
+      ok: false,
+      code: 'UNBALANCED_POSTING',
+      message: 'Total debits do not equal total credits.',
+    };
+  }
+
+  const total = debits.reduce((acc, l) => acc.add(l.amount), Money.zero(currency));
+  return { ok: true, entry: { ...draft, currency, total } };
 }
 
 /**
- * Execute double-entry accounting transaction with debit and credit balance invariant enforcement
+ * The common two-sided movement with an optional fee, expressed as explicit
+ * legs so the balance check has something real to verify.
+ *
+ *   debit  source            amount + fee
+ *   credit destination       amount
+ *   credit fee revenue       fee            (only when fee > 0)
  */
-export function createDoubleEntryTransaction(
-  params: DoubleEntryTransactionParams
-): LedgerTransactionResult {
-  const cleanAmount = toExactDecimal(params.amount);
-  const cleanFee = toExactDecimal(params.fee || 0);
-  const totalMovement = cleanAmount + cleanFee;
+export function buildTransferPosting(params: {
+  idempotencyKey: string;
+  type: TransactionType;
+  amount: Money;
+  fee?: Money;
+  sourceAccountCode: string;
+  destinationAccountCode: string;
+  feeAccountCode?: string;
+  metadata?: Readonly<Record<string, string | number | boolean>>;
+}): LedgerValidation {
+  const {
+    idempotencyKey, type, amount, sourceAccountCode, destinationAccountCode,
+    feeAccountCode = '4010-FEE-REVENUE', metadata,
+  } = params;
+  const fee = params.fee ?? Money.zero(amount.currency);
 
-  if (cleanAmount <= 0) {
-    return {
-      success: false,
-      transactionId: '',
-      idempotencyKey: params.idempotencyKey,
-      entries: [],
-      error: 'Transaction amount must be strictly greater than zero.',
-    };
+  if (fee.currency !== amount.currency) {
+    return { ok: false, code: 'CURRENCY_MISMATCH', message: 'Fee currency must match amount currency.' };
+  }
+  if (fee.isNegative()) {
+    return { ok: false, code: 'NEGATIVE_FEE', message: 'Fee may not be negative.' };
   }
 
-  // Construct balanced debit and credit entries
-  const debits = [totalMovement];
-  const credits = [cleanAmount, cleanFee].filter(v => v > 0);
-
-  if (!verifyLedgerBalance(debits, credits)) {
-    return {
-      success: false,
-      transactionId: '',
-      idempotencyKey: params.idempotencyKey,
-      entries: [],
-      error: 'Ledger Invariance Error: Total Debits do not equal Total Credits.',
-    };
-  }
-
-  const txId = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  const now = new Date().toISOString();
-
-  const entries: LedgerEntryRecord[] = [
-    {
-      id: `ent_${Date.now()}_1`,
-      transactionId: txId,
-      accountCode: params.sourceAccountCode,
-      entryType: 'debit',
-      amount: totalMovement,
-      currency: params.currency,
-      createdAt: now,
-    },
-    {
-      id: `ent_${Date.now()}_2`,
-      transactionId: txId,
-      accountCode: params.destinationAccountCode,
-      entryType: 'credit',
-      amount: cleanAmount,
-      currency: params.currency,
-      createdAt: now,
-    },
+  const legs: PostingLeg[] = [
+    { accountCode: sourceAccountCode, direction: 'debit', amount: amount.add(fee) },
+    { accountCode: destinationAccountCode, direction: 'credit', amount },
   ];
-
-  if (cleanFee > 0) {
-    entries.push({
-      id: `ent_${Date.now()}_3`,
-      transactionId: txId,
-      accountCode: '4010-FINARA-FEE-REVENUE',
-      entryType: 'credit',
-      amount: cleanFee,
-      currency: params.currency,
-      createdAt: now,
-    });
+  if (fee.isPositive()) {
+    legs.push({ accountCode: feeAccountCode, direction: 'credit', amount: fee, memo: 'transfer fee' });
   }
 
-  return {
-    success: true,
-    transactionId: txId,
-    idempotencyKey: params.idempotencyKey,
-    entries,
-  };
+  return validateJournalEntry({ idempotencyKey, type, legs, metadata });
+}
+
+/** Net effect on one account, for assertions and reconciliation. */
+export function netForAccount(entry: ValidatedJournalEntry, accountCode: string): Money {
+  return entry.legs
+    .filter((l) => l.accountCode === accountCode)
+    .reduce(
+      (acc, l) => (l.direction === 'debit' ? acc.add(l.amount) : acc.subtract(l.amount)),
+      Money.zero(entry.currency),
+    );
 }
