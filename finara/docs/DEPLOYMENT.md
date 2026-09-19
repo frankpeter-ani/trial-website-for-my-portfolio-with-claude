@@ -1,29 +1,59 @@
-# Finara Platform — Production Deployment Guide
+# Finara — Deployment
 
-## Production Deployment Workflow
+## Current deployment paths
 
-### 1. Database Migrations Execution
-Apply sequential migrations to your production Supabase database:
+### 1. Static preview (working today)
+
+The app is a pure client bundle, so any static host serves it.
+
 ```bash
-supabase db push --linked
+VITE_BASE=/ VITE_HASH_ROUTER=false npm run build   # root-hosted
 ```
-Or execute SQL files sequentially in the Supabase SQL Editor:
-1. `001_initial_schema.sql`
-2. `002_double_entry_ledger.sql`
-3. `003_kyc_and_documents.sql`
-4. `004_cards_and_controls.sql`
-5. `005_savings_and_multi_currency.sql`
-6. `006_risk_audit_webhooks.sql`
-7. `007_rls_and_rbac_policies.sql`
 
-### 2. Production Environment Variables
-Configure the following secrets in your deployment provider (Vercel / Netlify / AWS Amplify):
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- `APP_MODE=production`
+For a sub-path host, set `VITE_BASE=/<path>/` and `VITE_HASH_ROUTER=true`
+(static hosts cannot rewrite deep links to `index.html`).
 
-### 3. Build & Optimization Verification
+`public/` assets are **not** rewritten by Vite's `base`; resolve them through
+`import.meta.env.BASE_URL` (see the `asset()` helper in `Hero.tsx`).
+
+### 2. GitHub Pages (configured, pending one setting)
+
+`.github/workflows/deploy-finara-pages.yml` builds `finara/` and publishes to Pages
+on push. It sets `VITE_BASE` from the Pages base path and enables hash routing.
+
+**Blocked on:** repository *Settings → Pages → Source: GitHub Actions*. The workflow
+token cannot enable Pages itself (`Create Pages site failed: Resource not accessible
+by integration`). Once enabled, the workflow succeeds unchanged.
+
+Target URL: `https://frankpeter-ani.github.io/trial-website-for-my-portfolio-with-claude/`
+
+## Not yet possible
+
+A production deployment of a *financial* platform requires components that do not
+exist yet:
+
+- Supabase project with migrations applied
+- Edge Functions deployed (the only writer of financial state)
+- Secrets in Supabase secret management, never in the bundle
+- RLS verified by automated negative tests
+- Provider credentials for a licensed payment/banking partner
+
+Until those exist, only the **sandbox/demo** build may be deployed, and it must be
+visibly labelled as such.
+
+## Environment modes
+
+`APP_MODE` ∈ `development | staging | sandbox | production`.
+
+Sandbox must render a persistent indicator and must never present simulated
+balances as cleared funds.
+
+## Pre-deploy gate
+
 ```bash
+npm ci
+npm run lint
+npx tsc -b            # must be clean
+node tests/run-tests.js
 npm run build
 ```
-Verify that `dist/index.html` builds without bundle warnings or missing dependencies.
